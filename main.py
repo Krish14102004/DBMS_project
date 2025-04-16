@@ -1,7 +1,8 @@
 import streamlit as st
-import pymysql
 import pandas as pd
+import pymysql
 
+# ---------------------- DB Connection using PyMySQL ----------------------
 def get_connection():
     return pymysql.connect(
         host="localhost",
@@ -11,54 +12,69 @@ def get_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-# Reusable fetcher
 def fetch_data(query):
     conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(query)
-    rows = cursor.fetchall()
-    cursor.close()
+    with conn.cursor() as cursor:
+        cursor.execute(query)
+        rows = cursor.fetchall()
     conn.close()
     return pd.DataFrame(rows)
 
-# Sidebar menu
-st.sidebar.title("📊 University Dashboard")
-option = st.sidebar.selectbox("Select View", [
-    "🏠 Home",
-    "🧑‍🎓 Students",
-    "👨‍🏫 Faculty",
-    "🏢 Hostels",
-    "📚 Courses",
-    "🧪 Exams"
-])
+# ---------------------- Sidebar ----------------------
+st.set_page_config(page_title="University Dashboard", layout="wide")
+st.sidebar.title("🎓 University Dashboard")
 
-st.title("🎓 University Management Dashboard")
+page = st.sidebar.radio("Navigate", ["🏠 Home", "🗓️ Timetable", "📁 Views"])
 
-if option == "🏠 Home":
-    st.subheader("Welcome, Master 👑")
-    st.write("Use the sidebar to navigate through various views of your MySQL database.")
+# ---------------------- Home Page ----------------------
+if page == "🏠 Home":
+    st.title("🏠 Home")
+    st.success("Welcome, Master 👑")
+    st.write("Use the sidebar to view the timetable or access database tables.")
+#    st.image("https://i.imgur.com/JxbhRZj.png", width=600)  # Optional banner
 
-elif option == "🧑‍🎓 Students":
-    st.subheader("Student Info")
-    df = fetch_data("SELECT * FROM studentinfo")
-    st.dataframe(df)
+# ---------------------- Timetable Page ----------------------
+elif page == "🗓️ Timetable":
+    st.title("🗓️ Faculty Timetable")
+    st.info("Below is the weekly timetable for Prof. Arun Sharma")
 
-elif option == "👨‍🏫 Faculty":
-    st.subheader("Faculty Info")
-    df = fetch_data("SELECT * FROM facultyinfo")
-    st.dataframe(df)
+    timetable_data = {
+        'Day': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        '9:00 - 10:00 AM': ['DBMS', 'DAA', 'DBMS', 'DAA', 'IoT'],
+        '10:00 - 11:00 AM': ['-', 'DAA', '-', 'DAA', '-'],
+        '11:00 - 12:00 PM': ['-', '-', '-', '-', '-'],
+    }
+    df = pd.DataFrame(timetable_data)
+    st.dataframe(df, use_container_width=True)
 
-elif option == "🏢 Hostels":
-    st.subheader("Hostel Occupancy")
-    df = fetch_data("SELECT * FROM hosteloccupancy")
-    st.dataframe(df)
+# ---------------------- Views Page ----------------------
+elif page == "📁 Views":
+    st.title("📁 Database Views")
+    view_option = st.selectbox("Choose View", [
+        "🧑‍🎓 Students", "👨‍🏫 Faculty", "🏢 Hostels", "📚 Courses", "🧪 Exams"
+    ])
 
-elif option == "📚 Courses":
-    st.subheader("Courses")
-    df = fetch_data("SELECT * FROM coursesubjects")  # Use your view/table name
-    st.dataframe(df)
+    if view_option == "🧑‍🎓 Students":
+        df = fetch_data("SELECT * FROM studentinfo")
+        st.subheader("🧑‍🎓 Student Info")
+        st.dataframe(df)
 
-elif option == "🧪 Exams":
-    st.subheader("Exam Schedule")
-    df = fetch_data("SELECT * FROM examschedule")  # Use your view/table name
-    st.dataframe(df)
+    elif view_option == "👨‍🏫 Faculty":
+        df = fetch_data("SELECT * FROM facultyinfo")
+        st.subheader("👨‍🏫 Faculty Info")
+        st.dataframe(df)
+
+    elif view_option == "🏢 Hostels":
+        df = fetch_data("SELECT * FROM hosteloccupancy")
+        st.subheader("🏢 Hostel Info")
+        st.dataframe(df)
+
+    elif view_option == "📚 Courses":
+        df = fetch_data("SELECT * FROM courseinfo")
+        st.subheader("📚 Course Info")
+        st.dataframe(df)
+
+    elif view_option == "🧪 Exams":
+        df = fetch_data("SELECT * FROM examschedule")
+        st.subheader("🧪 Exam Schedule")
+        st.dataframe(df)
