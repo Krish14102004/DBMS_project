@@ -2,7 +2,13 @@ import streamlit as st
 import pandas as pd
 import pymysql
 
-# ---------------------- DB Connection using PyMySQL ----------------------
+# ----------------- Dummy Credentials -----------------
+users = {
+    "admin": "admin123",
+    "faculty": "teacher456"
+}
+
+# ----------------- DB Connection -----------------
 def get_connection():
     return pymysql.connect(
         host="localhost",
@@ -20,20 +26,68 @@ def fetch_data(query):
     conn.close()
     return pd.DataFrame(rows)
 
-# ---------------------- Sidebar ----------------------
+# ----------------- Login Logic -----------------
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.title("🔐 Login to University Dashboard")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    if st.button("Login"):
+        if username in users and users[username] == password:
+            st.success("Login successful! Welcome, Master 👑")
+            st.session_state.logged_in = True
+            st.rerun()
+        else:
+            st.error("Invalid credentials! Try again.")
+    st.stop()
+
+# ----------------- After Login: Main App -----------------
 st.set_page_config(page_title="University Dashboard", layout="wide")
 st.sidebar.title("🎓 University Dashboard")
 
 page = st.sidebar.radio("Navigate", ["🏠 Home", "🗓️ Timetable", "📁 Views"])
 
-# ---------------------- Home Page ----------------------
+# ----------- Home Page -----------
 if page == "🏠 Home":
-    st.title("🏠 Home")
-    st.success("Welcome, Master 👑")
-    st.write("Use the sidebar to view the timetable or access database tables.")
-#    st.image("https://i.imgur.com/JxbhRZj.png", width=600)  # Optional banner
+    st.title("🏫 SRM University of Science & Technology")
+    st.subheader("Learn. Leap. Lead.")
+    st.markdown("### 📍 *Chennai, India*  &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp; 🏗️ *Established 2002*")
+    st.markdown("---")
 
-# ---------------------- Timetable Page ----------------------
+    col1, col2, col3 = st.columns(3)
+    with col1: st.metric("🎓 Students", "52,000+ Full-Time")
+    with col2: st.metric("🏛️ Departments", "19 Departments / 7 Schools")
+    with col3: st.metric("👨‍🏫 Faculty", "3550+ Members")
+
+    st.markdown("---")
+    st.markdown("### 📚 Academic Programs Offered:")
+    st.markdown("""
+    - Bachelor of Business Administration  
+    - BCA  
+    - Information Technology  
+    - Computer Science and Engineering  
+    - Artificial Intelligence  
+    - Diploma  
+    - Electronics and Communication Engineering  
+    - Law  
+    - Master of Engineering  
+    """)
+
+    st.markdown("---")
+    infra_cols = st.columns(4)
+    infra_cols[0].success("🏠 Hostel Available")
+    infra_cols[1].info("📚 Central Library")
+    infra_cols[2].warning("🔬 Research Labs")
+    infra_cols[3].error("📏 250 Acres Campus")
+
+    st.markdown("---")
+    st.markdown("#### 👨‍💼 Dean/Principal: *Dr. Rajiv Janardhanan*")
+    st.markdown("Visit the official website: [SRM University](https://www.srmist.edu.in/)")
+    st.image("https://www.srmist.edu.in/sites/default/files/2021-04/SRM_Logo_0.png", width=200)
+
+# ----------- Timetable -----------
 elif page == "🗓️ Timetable":
     st.title("🗓️ Faculty Timetable")
     st.info("Below is the weekly timetable for Prof. Arun Sharma")
@@ -47,7 +101,7 @@ elif page == "🗓️ Timetable":
     df = pd.DataFrame(timetable_data)
     st.dataframe(df, use_container_width=True)
 
-# ---------------------- Views Page ----------------------
+# ----------- Views Section -----------
 elif page == "📁 Views":
     st.title("📁 Database Views")
     view_option = st.selectbox("Choose View", [
@@ -70,7 +124,7 @@ elif page == "📁 Views":
         st.dataframe(df)
 
     elif view_option == "📚 Courses":
-        df = fetch_data("SELECT * FROM courseinfo")
+        df = fetch_data("SELECT * FROM coursesubjects")
         st.subheader("📚 Course Info")
         st.dataframe(df)
 
