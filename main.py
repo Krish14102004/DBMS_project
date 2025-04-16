@@ -5,7 +5,8 @@ import pymysql
 # ----------------- Dummy Credentials -----------------
 users = {
     "admin": "admin123",
-    "faculty": "teacher456"
+    "faculty": "teacher456",
+    "kr7819": "shailesh.05"
 }
 
 # ----------------- DB Connection -----------------
