@@ -15,8 +15,6 @@ create table faculty
     Faculty_Phoneno varchar(15) null,
     dept_id         int         null,
     constraint fk_faculty_dept
-        foreign key (dept_id) references department (dept_id),
-    constraint fk_faculty_department
         foreign key (dept_id) references department (dept_id)
 );
 
@@ -53,14 +51,8 @@ create table student
     hostel_id int          null,
     constraint fk_student_dept
         foreign key (dept_id) references department (dept_id),
-    constraint fk_student_department
-        foreign key (dept_id) references department (dept_id),
-    constraint fk_student_faculty
-        foreign key (FA_id) references faculty (F_id),
     constraint fk_student_hostel
         foreign key (hostel_id) references hostel (hostel_id),
-    constraint student_ibfk_1
-        foreign key (FA_id) references faculty (F_id),
     constraint fk_student_faculty_advisor
         foreign key (FA_id) references faculty (F_id)
 );
